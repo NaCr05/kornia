@@ -114,6 +114,26 @@ Static (non-random) configuration goes in ``self.flags`` (a plain dict), read fr
 argument of `apply_transform`. A custom augmentation works standalone and inside
 `AugmentationSequential` with no extra wiring.
 
+Lazy matrices and saved state
+-----------------------------
+
+The built-in 2D intensity augmentations, flips, ``Resize`` (including ``LongestMaxSize`` and
+``SmallestMaxSize``), and slice-mode ``RandomResizedCrop`` compute their transformation matrix
+only when it is requested. Their pending matrix state stores the input's shape, dtype and device
+along with the transformation parameters, without retaining the image tensor or its autograd graph.
+Consequently, ``pickle``, ``copy.deepcopy`` and ``torch.save`` of these modules do not carry the
+last image batch merely because its matrix has not yet been read. Parameters remain available for
+replay, including their existing gradient connections.
+
+Custom subclasses may use pixel values in ``compute_transformation`` or another matrix-path
+method. Such overrides keep the original lazy behavior, including retaining the input until the
+matrix is read or another forward replaces the pending state. Inheriting an unchanged built-in
+implementation preserves its compact state; overriding a method does not implicitly promise that
+it can operate without pixel data.
+
+Custom geometric transformations
+--------------------------------
+
 For a rigid **geometric** augmentation, also implement `compute_transformation` to return the
 ``(B, 3, 3)`` transform matrix — kornia then applies it, inverts it, and propagates it to masks,
 boxes and keypoints:
