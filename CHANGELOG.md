@@ -382,7 +382,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Bug fixes
 
 * Keep keypoints and bounding boxes unchanged when a padded `RandomCrop` is skipped, matching the
-  returned images and masks. (#4473)
+  returned images and masks. (#4485)
 
 * `RandomMosaic` now preserves `(H, W)` for non-square inputs when `output_size=None`; it previously
   returned `(W, H)`. `start_ratio_range` now scales x by width and y by height; it previously scaled
